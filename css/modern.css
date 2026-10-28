@@ -1,0 +1,94 @@
+/* ===== Capa moderna: misma paleta de la tarjeta, interfaz limpia y plana ===== */
+:root{
+  --head:"Sora","Plus Jakarta Sans",system-ui,sans-serif;
+  --body:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --surf:rgba(255,255,255,.045); --surf2:rgba(255,255,255,.08); --edge:rgba(255,255,255,.08); --edge2:rgba(255,255,255,.14);
+  --glass:rgba(20,25,31,.72);
+  --pumpkin:linear-gradient(135deg,#FFC93C 0%,#F2A33A 55%,#E8892A 100%);
+  --eye:linear-gradient(135deg,#E0453A 0%,#C8211B 100%);
+  --sh:0 1px 2px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.30);
+  --r:20px; --r-sm:14px;
+}
+body{letter-spacing:-.005em;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% -5%,rgba(242,163,58,.12),transparent 70%),
+    radial-gradient(ellipse 50% 35% at 100% 100%,rgba(184,106,58,.12),transparent 70%),
+    var(--bg);background-attachment:fixed}
+.webs .tl{opacity:.13}.webs .tr{opacity:.09}.webs .br{opacity:.16}.webs .bl{opacity:.08}
+
+h1,h2,h3{font-family:var(--head);font-weight:700;color:var(--fg);text-shadow:none;letter-spacing:-.025em}
+h1{font-size:clamp(32px,6vw,52px);line-height:1.05}
+h2{font-size:clamp(22px,3.6vw,30px);line-height:1.15}
+h3{font-size:19px;line-height:1.25}
+.eyebrow{color:var(--orange);letter-spacing:.14em;font-size:11.5px}
+
+.top{background:rgba(11,13,16,.72);border-bottom-color:var(--edge)}
+.brand .wm b{color:var(--fg);font-family:var(--head);letter-spacing:.02em}
+.brand .hw{font-size:20px;text-shadow:none;border-left-color:var(--edge2)}
+
+.hero{padding-block:44px 8px;gap:14px}
+.hero .title{font-family:var(--display);font-weight:400;color:var(--orange);letter-spacing:0;font-size:clamp(52px,12vw,104px);text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 24px rgba(242,163,58,.30)}
+.hero .logo b{color:var(--fg);font-family:var(--head)}
+.pumpkins svg{width:clamp(64px,13vw,96px);height:clamp(64px,13vw,96px)}
+.pumpkins svg.big{width:clamp(88px,18vw,132px);height:clamp(88px,18vw,132px);margin-inline:-10px}
+.pumpkins svg.sm{width:clamp(56px,11vw,80px);height:clamp(56px,11vw,80px)}
+.prize{background:var(--surf);border-color:var(--edge);backdrop-filter:none;-webkit-backdrop-filter:none;font-weight:500}
+
+.jcard,.isla,.panel,.row,.pcard,.tabs,.chip,.prize,.alert,.pill,.empty{background:var(--glass);border-color:var(--edge);box-shadow:none}
+.jcard,.isla,.panel,.pcard{border-radius:var(--r)}
+.jcard:hover,.isla:hover,.row:hover{border-color:rgba(242,163,58,.45);box-shadow:var(--sh);transform:translateY(-2px)}
+.row:hover{transform:none}
+.jcard b{font-family:var(--head);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.jcard svg{width:40px;height:40px;padding:6px;border-radius:12px;background:var(--surf)}
+.isla h3{font-size:22px}
+.panel h3{font-size:19px}
+
+.btn{background:var(--surf);border-color:var(--edge);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-weight:600;padding:10px 18px}
+.btn:hover{background:var(--surf2);border-color:var(--edge2);box-shadow:none}
+.btn.pri{background:var(--pumpkin);border-color:transparent;color:var(--ink);box-shadow:0 6px 20px rgba(242,163,58,.25)}
+.btn.pri:hover{filter:brightness(1.06);box-shadow:0 8px 24px rgba(242,163,58,.32)}
+.btn.red{background:var(--eye);border-color:transparent;box-shadow:0 6px 20px rgba(200,33,27,.25)}
+.btn.ghost{background:transparent;border-color:var(--edge)}
+
+.tabs{background:var(--surf);padding:5px}
+.tabs button.on{background:var(--fg);color:var(--bg);box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.chip{background:var(--surf);font-weight:600}
+.chip.on{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.bar{background:var(--surf2);box-shadow:none;height:6px}
+.bar i{background:var(--pumpkin);box-shadow:none}
+.mark{border-color:var(--edge2)}
+.mark.done,.mark.excl{box-shadow:none}
+
+.search,.inp{background-color:var(--surf);border-color:var(--edge);box-shadow:none}
+.search:focus,.inp:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(242,163,58,.18)}
+
+.pad{max-width:300px;gap:16px 22px}
+.pad button{width:100%;max-width:80px;height:auto;aspect-ratio:1/1;justify-self:center;border-radius:50%;background:var(--surf);border-color:var(--edge);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;font-family:var(--head);font-weight:600;font-size:28px}
+.pad button:hover{background:var(--surf2)}
+.pad button:active{background:var(--orange);color:var(--ink);border-color:var(--orange);box-shadow:none}
+.dots i{width:14px;height:14px;border-color:var(--edge2)}
+.dots i.on{border-color:var(--orange);box-shadow:none}
+
+.sheet-bg{background:rgba(3,4,6,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.sheet{background:#12161c;border-color:var(--edge);box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.sh-head h2{font-size:24px}
+.icon-btn{background:var(--surf);border-color:var(--edge)}
+.scale span{background:var(--surf);border-color:transparent}
+.crit-h b{font-family:var(--head);font-weight:600;letter-spacing:-.01em}
+.nums button{background:var(--surf);border-color:var(--edge);box-shadow:none;border-radius:var(--r-sm);font-family:var(--head);font-weight:600}
+.nums button:hover{background:var(--surf2);border-color:var(--edge2)}
+.nums button.on{background:var(--pumpkin);border-color:transparent;color:var(--ink);box-shadow:0 6px 18px rgba(242,163,58,.35)}
+.excl{background:var(--surf);border-color:var(--edge)}
+
+.toast{background:#1a2027;border-color:var(--edge2);box-shadow:var(--sh)}
+.atabs{border-bottom-color:var(--edge)}
+.tbl-wrap{background:rgba(20,25,31,.8);border-color:var(--edge)}
+th{background:transparent}
+th,td{border-bottom-color:var(--edge)}
+.alert{border-left-width:3px}
+
+.stage h1{font-family:var(--display);font-weight:400;color:var(--orange);letter-spacing:0;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 24px rgba(242,163,58,.30);font-size:clamp(42px,8vw,88px)}
+.pcard .who2{font-family:var(--head);font-weight:700;letter-spacing:-.02em}
+.pcard.p1 .who2{color:var(--orange);text-shadow:0 0 24px rgba(242,163,58,.35)}
+.pcard.p1{border-color:rgba(242,163,58,.6);box-shadow:0 0 50px rgba(242,163,58,.18)}
+.pcard.hid .q{font-family:var(--head)}

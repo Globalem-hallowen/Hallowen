@@ -1,0 +1,28 @@
+/* Layout: una columna centrada (máx. 980px) sobre "noche con telarañas"; paneles de vidrio oscuro, acentos de calabaza encendida y ojo rojo. Identidad tomada de la tarjeta de Halloween Globalem. */
+:root{
+  /* Fondo y superficies: negro azulado de la tarjeta */
+  --bg:#0b0d10; --bg2:#11151a; --night:#1b1a2e;
+  --card:#161b21; --card2:#1f262e;
+  --glass:linear-gradient(180deg,rgba(32,40,49,.70),rgba(15,19,24,.74));
+  --glass-solid:#141920;
+  /* Telarañas */
+  --web:#8fa6b8; --rust:#b86a3a;
+  --line:rgba(143,166,184,.20); --line2:rgba(143,166,184,.36);
+  /* Calabaza, brillo y ojo */
+  --orange:#F2A33A; --ember:#C9661E; --glow:#FFC93C; --red:#C8211B; --red2:#E0453A;
+  /* Marca Globalem */
+  --logo-g:#a3a7ac; --logo-y:#F2C230;
+  /* Texto */
+  --fg:#F3EEE6; --muted:#a9b3bc; --dim:#6b7680; --ink:#1a1206;
+  --ok:#7cc48a;
+  /* Gradientes, sombras y bordes */
+  --pumpkin:radial-gradient(120% 140% at 50% 0%,#FFC93C 0%,#F2A33A 45%,#C9661E 100%);
+  --eye:radial-gradient(120% 140% at 50% 0%,#E0453A 0%,#C8211B 55%,#7a0f0c 100%);
+  --sh:0 12px 34px rgba(0,0,0,.55);
+  --sh-glow:0 0 22px rgba(255,201,60,.30);
+  --inset:inset 0 1px 0 rgba(255,255,255,.05);
+  --r:16px; --r-sm:12px;
+  --display:"Griffy","Henny Penny",Georgia,serif;
+  --body:"Montserrat","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}

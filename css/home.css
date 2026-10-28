@@ -1,0 +1,24 @@
+/* Inicio: portada como la tarjeta */
+.hero{padding-block:34px 10px;display:grid;gap:16px;justify-items:center;text-align:center}
+.hero .title{font-size:clamp(56px,14vw,124px);line-height:1;display:flex;align-items:center;justify-content:center}
+.hero .title .eye{width:.78em;height:.78em;margin:0 .02em;filter:drop-shadow(0 0 10px rgba(200,33,27,.45))}
+.hero .logo{display:grid;justify-items:center;gap:4px}
+.hero .logo .mark-g{width:52px;height:52px}
+.hero .logo b{font-weight:800;font-size:26px;letter-spacing:.05em;color:var(--logo-g);line-height:1}
+.hero .logo small{font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:var(--dim)}
+.pumpkins{display:flex;align-items:flex-end;justify-content:center;gap:0;margin-block:6px;filter:drop-shadow(0 0 26px rgba(255,180,60,.35))}
+.pumpkins svg{width:clamp(80px,18vw,130px);height:clamp(80px,18vw,130px)}
+.pumpkins svg.big{width:clamp(110px,25vw,180px);height:clamp(110px,25vw,180px);margin-inline:-14px;position:relative;z-index:1}
+.pumpkins svg.sm{width:clamp(70px,15vw,105px);height:clamp(70px,15vw,105px)}
+.hero p{max-width:56ch;margin:0;color:var(--muted)}
+.prizes{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.prize{border:1px solid var(--line2);border-radius:999px;padding:8px 15px;font-size:14px;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.prize b{color:var(--glow)}
+.section-t{margin:30px 0 12px;display:flex;align-items:baseline;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.judges{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.jcard{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:20px;text-align:left;display:flex;align-items:center;gap:14px;box-shadow:var(--inset),var(--sh);transition:transform .15s,border-color .15s,box-shadow .15s}
+.jcard:hover{border-color:rgba(242,163,58,.6);transform:translateY(-2px);box-shadow:var(--inset),var(--sh),0 0 24px rgba(242,163,58,.18)}
+.jcard svg{width:44px;height:44px;flex:none}
+.jcard b{font-family:var(--display);font-size:26px;font-weight:400;color:var(--fg);line-height:1.1}
+.jcard span{display:block;font-size:13px;color:var(--muted)}
+.others{display:flex;gap:10px;flex-wrap:wrap}

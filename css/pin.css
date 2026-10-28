@@ -1,0 +1,13 @@
+/* PIN */
+.pinbox{max-width:360px;margin:40px auto 0;text-align:center;display:grid;gap:18px}
+.dots{display:flex;justify-content:center;gap:14px}
+.dots i{width:18px;height:18px;border-radius:50%;border:2px solid var(--orange);display:block;transition:background .15s}
+.dots i.on{background:var(--pumpkin);box-shadow:0 0 12px var(--glow)}
+.dots.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;max-width:320px;margin:0 auto}
+.pad button{height:68px;width:100%;border-radius:var(--r);border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:var(--inset);font-size:26px;font-weight:700;display:grid;place-items:center;padding:0;font-variant-numeric:tabular-nums;transition:border-color .12s,box-shadow .12s}
+.pad button:hover{border-color:var(--line2)}
+.pad button:active{border-color:var(--orange);box-shadow:0 0 16px rgba(242,163,58,.3)}
+.pad button svg{width:24px;height:24px}
+.pinmsg{min-height:22px;font-size:14px}

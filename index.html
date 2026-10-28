@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<title>Jurado Halloween Globalem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Griffy&family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/pin.css">
+<link rel="stylesheet" href="css/judge.css">
+<link rel="stylesheet" href="css/sheet.css">
+<link rel="stylesheet" href="css/admin.css">
+<link rel="stylesheet" href="css/awards.css">
+<link rel="stylesheet" href="css/modern.css">
+</head>
+<body>
+
+<div class="webs" aria-hidden="true" id="webs"></div>
+<header class="top"><div class="top-in">
+  <button class="brand" id="brand" aria-label="Ir al inicio">
+    <svg class="mark-g" viewBox="0 0 64 64" aria-hidden="true"><use href="#i-globalem"/></svg>
+    <span class="wm"><b>GLOBALEM</b><small>Energizamos vidas</small></span>
+    <span class="hw">Halloween 2026</span>
+  </button>
+  <div class="who" id="who"></div>
+</div></header>
+<main class="wrap" id="app"><div class="loading">Invocando a los espíritus…</div></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="sheetRoot"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="pkMid" cx="50%" cy="32%" r="72%"><stop offset="0" stop-color="#F9B04A"/><stop offset=".5" stop-color="#E8892A"/><stop offset="1" stop-color="#2e2336"/></radialGradient>
+    <radialGradient id="pkSide" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#E08A2E"/><stop offset=".55" stop-color="#B8601F"/><stop offset="1" stop-color="#1f1a2c"/></radialGradient>
+    <radialGradient id="eyeW" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#ffffff"/><stop offset=".65" stop-color="#efe9e2"/><stop offset="1" stop-color="#b9aea4"/></radialGradient>
+    <radialGradient id="iris" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#ff6a50"/><stop offset=".55" stop-color="#C8211B"/><stop offset="1" stop-color="#6e0d0a"/></radialGradient>
+    <symbol id="i-globalem" viewBox="0 0 64 64">
+      <g fill="none" stroke="#a3a7ac" stroke-width="3" stroke-linecap="round">
+        <path d="M30 8a24 24 0 0 0 0 48"/><path d="M30 8c-10 7-10 41 0 48"/><path d="M9 20h21M6 32h24M9 44h21"/>
+      </g>
+      <path d="M34 8a24 24 0 0 1 0 48z" fill="#F2C230"/>
+      <path d="M47.5 8.6l1.6-2.8M57.4 18.5l2.8-1.6M61 32h3M57.4 45.5l2.8 1.6M47.5 55.4l1.6 2.8" stroke="#F2C230" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-eye" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="29" fill="url(#eyeW)" stroke="#1b1a2e" stroke-width="2"/>
+      <path d="M5 35c6 1 9 4 12 3M9 47c5-2 8 0 10-3M58 21c-4 2-7 1-9 4M56 46c-4-1-6 1-9-1" fill="none" stroke="#C8211B" stroke-width="1" opacity=".4"/>
+      <circle cx="34" cy="31" r="15" fill="url(#iris)"/>
+      <circle cx="34" cy="31" r="6" fill="#0b0d10"/>
+      <circle cx="38" cy="26.5" r="2.6" fill="#fff" opacity=".9"/>
+    </symbol>
+    <symbol id="i-pumpkin" viewBox="0 0 64 64">
+      <path d="M29.5 17c0-6 2.5-11 6.5-14l3 2.2c-3 3-4.2 7-3.4 11.8z" fill="#1b1a2e"/>
+      <ellipse cx="19" cy="38" rx="15" ry="19" fill="url(#pkSide)"/>
+      <ellipse cx="45" cy="38" rx="15" ry="19" fill="url(#pkSide)"/>
+      <ellipse cx="32" cy="37" rx="15" ry="22" fill="url(#pkMid)"/>
+      <path d="M19 31c3-4 8-3 10 1-4 1.5-7 1.2-10-1zM45 31c-3-4-8-3-10 1 4 1.5 7 1.2 10-1zM30 40l2-3.5 2 3.5zM17 43c5 8 25 8 30 0l-4 3-3-3-3.5 4-3.5-4-3.5 4-3.5-4-3 3z" fill="#FFD54A"/>
+    </symbol>
+    <symbol id="i-bat" viewBox="0 0 64 40">
+      <path d="M32 12l-3-6-2 7c-5-3-14-5-25 0 6 3 9 8 8 15 4-4 9-4 12 1 2-4 6-6 10-3 4-3 8-1 10 3 3-5 8-5 12-1-1-7 2-12 8-15-11-5-20-3-25 0l-2-7z" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-web" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/><path d="M12 6l4.2 1.8L18 12l-1.8 4.2L12 18l-4.2-1.8L6 12l1.8-4.2z"/></g></symbol>
+    <symbol id="i-mask" viewBox="0 0 24 24"><path d="M3 7c3-2 15-2 18 0 0 7-3 11-9 11S3 14 3 7z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 10.5c1-1 3-1 4 0M13 10.5c1-1 3-1 4 0" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<script src="config.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
