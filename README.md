@@ -79,7 +79,7 @@ y abre `http://localhost:8000`.
 | Quién | PIN |
 |---|---|
 | Jorge | 4817 |
-| Anonimo | 2593 |
+| Invitado especial | 2593 |
 | Tifanny | 7364 |
 | Panel de administración | 3108 |
 

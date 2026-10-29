@@ -9,6 +9,7 @@ export function findItem(key) {
   return p ? { key, group: p.group, name: p.name, kind: "disfraz" } : null;
 }
 export function isDone(e) { return !!e && (e.excl || (Array.isArray(e.c) && e.c.length === 4 && e.c.every(v => v >= 1))); }
+export function countC(e) { return e && Array.isArray(e.c) ? e.c.filter(v => v >= 1).length : 0; }
 export function sumC(e) { return e && Array.isArray(e.c) ? e.c.reduce((a, v) => a + (v || 0), 0) : 0; }
 export function sortPeople(list) {
   return list.slice().sort((a, b) => (a.group - b.group) || ((a.order ?? 999) - (b.order ?? 999)) || a.name.localeCompare(b.name, "es"));

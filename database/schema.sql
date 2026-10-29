@@ -94,6 +94,9 @@ create table if not exists public.estado_concurso (
     version               bigint      not null default 1,
     actualizado_en        timestamptz not null default now()
 );
+-- true cuando la pantalla de premiación llegó al final: en cualquier dispositivo se muestran directo los
+-- ganadores. Vuelve a false al ocultar o volver a revelar resultados.
+alter table public.estado_concurso add column if not exists premiacion_terminada boolean not null default false;
 
 -- Con la votación cerrada, la base de datos rechaza cualquier cambio de notas.
 create or replace function public.bloquear_si_votacion_cerrada()
@@ -199,10 +202,23 @@ revoke all on public.v_resultados_isla, public.v_resultados_disfraz, public.v_al
 -- =====================================================================
 insert into public.estado_concurso (id) values (1) on conflict (id) do nothing;
 
+-- Cambio de nombre: "Anonimo" pasó a ser "Invitado especial". Conserva su id, sus notas y sus sesiones.
+-- El hash del PIN incluye el nombre, así que se borra y más abajo recibe el PIN inicial (2593).
+do $$
+begin
+    if exists (select 1 from public.usuarios where nombre = 'Anonimo')
+       and not exists (select 1 from public.usuarios where nombre = 'Invitado especial') then
+        if to_regclass('public.intentos_login') is not null then
+            delete from public.intentos_login where nombre = 'Anonimo';
+        end if;
+        update public.usuarios set nombre = 'Invitado especial', pin_hash = null where nombre = 'Anonimo';
+    end if;
+end $$;
+
 -- Los PIN iniciales se asignan más abajo, solo a quien aún no tenga PIN.
 insert into public.usuarios (nombre, rol) values
     ('Jorge',   'jurado'),
-    ('Anonimo', 'jurado'),
+    ('Invitado especial', 'jurado'),
     ('Tifanny', 'jurado'),
     ('admin',   'admin')
 on conflict (nombre) do nothing;
@@ -324,7 +340,8 @@ as $$
     select jsonb_build_object(
         'closed',   votacion_cerrada,
         'revealed', resultados_revelados,
-        'results',  case when p_all or resultados_revelados then resultados end)
+        'results',  case when p_all or resultados_revelados then resultados end,
+        'awardsDone', resultados_revelados and premiacion_terminada)
     from public.estado_concurso where id = 1
 $$;
 
@@ -348,6 +365,60 @@ begin
                              order by grupo_id, orden, nombre)
             from public.participantes where activo), '[]'::jsonb),
         'state', public._hw_state(false));
+end;
+$$;
+
+-- Detalle de resultados: total por criterio (suma de los 3 jurados, sin notas individuales) de cada isla y
+-- participante. Solo responde cuando la premiación terminó; antes devuelve {locked: true}.
+-- Misma lógica que js/results.js: total = suma de criterios; empate por Creatividad (c2); un "excluido" de
+-- cualquier jurado saca al participante del premio.
+create or replace function public.hw_results_detail()
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, pg_catalog
+as $$
+begin
+    if not exists (select 1 from public.estado_concurso
+                   where id = 1 and resultados_revelados and premiacion_terminada) then
+        return jsonb_build_object('locked', true);
+    end if;
+    return jsonb_build_object(
+        'islas', coalesce((
+            select jsonb_agg(jsonb_build_object('group', x.id, 'c', jsonb_build_array(x.s1, x.s2, x.s3, x.s4),
+                                                'total', x.total, 'place', x.puesto)
+                             order by x.puesto, x.id)
+            from (
+                select g.id, s.s1, s.s2, s.s3, s.s4, s.s1 + s.s2 + s.s3 + s.s4 as total,
+                       rank() over (order by s.s1 + s.s2 + s.s3 + s.s4 desc, s.s2 desc) as puesto
+                from public.grupos g
+                cross join lateral (
+                    select coalesce(sum(c.c1), 0)::int s1, coalesce(sum(c.c2), 0)::int s2,
+                           coalesce(sum(c.c3), 0)::int s3, coalesce(sum(c.c4), 0)::int s4
+                    from public.calificaciones c where c.categoria = 'isla' and c.grupo_id = g.id) s
+            ) x), '[]'::jsonb),
+        'disfraces', coalesce((
+            select jsonb_agg(jsonb_build_object('id', x.id::text, 'name', x.nombre, 'group', x.grupo_id,
+                                                'c', jsonb_build_array(x.s1, x.s2, x.s3, x.s4), 'total', x.total,
+                                                'excl', x.excluido, 'place', x.puesto)
+                             order by x.excluido, x.puesto, x.nombre)
+            from (
+                select a.*, a.s1 + a.s2 + a.s3 + a.s4 as total,
+                       case when a.excluido then null
+                            else rank() over (partition by a.excluido
+                                              order by a.s1 + a.s2 + a.s3 + a.s4 desc, a.s2 desc) end as puesto
+                from (
+                    select p.id, p.nombre, p.grupo_id,
+                           coalesce(sum(c.c1) filter (where not c.excluido), 0)::int s1,
+                           coalesce(sum(c.c2) filter (where not c.excluido), 0)::int s2,
+                           coalesce(sum(c.c3) filter (where not c.excluido), 0)::int s3,
+                           coalesce(sum(c.c4) filter (where not c.excluido), 0)::int s4,
+                           coalesce(bool_or(c.excluido), false) as excluido
+                    from public.participantes p
+                    left join public.calificaciones c on c.categoria = 'disfraz' and c.participante_id = p.id
+                    where p.activo
+                    group by p.id
+                ) a
+            ) x), '[]'::jsonb));
 end;
 $$;
 
@@ -516,7 +587,8 @@ begin
 end;
 $$;
 
--- p_patch: {closed?: bool, revealed?: bool, results?: json}
+-- p_patch: {closed?: bool, revealed?: bool, results?: json, awardsDone?: bool}
+-- Publicar resultados nuevos, ocultarlos o reabrir la votación reinicia la premiación (awardsDone = false).
 create or replace function public.hw_admin_state(p_token text, p_patch jsonb)
 returns jsonb
 language plpgsql volatile security definer
@@ -525,10 +597,24 @@ as $$
 declare
     u public.usuarios := public._hw_user(p_token, 'admin');
 begin
+    -- Los resultados solo se revelan con la votación cerrada.
+    if coalesce((p_patch ->> 'revealed')::boolean, false)
+       and not coalesce((p_patch ->> 'closed')::boolean,
+                        (select votacion_cerrada from public.estado_concurso where id = 1)) then
+        raise exception 'Primero cierra la votación para poder revelar los resultados.' using errcode = 'PT409';
+    end if;
+    -- Reabrir la votación reinicia los resultados: se ocultan, se borra el top 3 y la premiación queda sin terminar.
     update public.estado_concurso set
         votacion_cerrada     = coalesce((p_patch ->> 'closed')::boolean, votacion_cerrada),
-        resultados_revelados = coalesce((p_patch ->> 'revealed')::boolean, resultados_revelados),
-        resultados           = case when p_patch ? 'results' then p_patch -> 'results' else resultados end
+        resultados_revelados = case when (p_patch ->> 'closed')::boolean is false then false
+                                    else coalesce((p_patch ->> 'revealed')::boolean, resultados_revelados) end,
+        resultados           = case when (p_patch ->> 'closed')::boolean is false then null
+                                    when p_patch ? 'results' then p_patch -> 'results' else resultados end,
+        premiacion_terminada = case
+            when (p_patch ->> 'closed')::boolean is false then false
+            when p_patch ? 'awardsDone' then coalesce((p_patch ->> 'awardsDone')::boolean, false)
+            when p_patch ? 'results' or (p_patch ->> 'revealed')::boolean is false then false
+            else premiacion_terminada end
     where id = 1;
     perform public._hw_bump();
     return public._hw_state(true);
@@ -628,7 +714,7 @@ revoke execute on function
 from public, anon, authenticated;
 
 revoke execute on function
-    public.hw_public(bigint), public.hw_login(text, text), public.hw_session(text), public.hw_logout(text),
+    public.hw_public(bigint), public.hw_results_detail(), public.hw_login(text, text), public.hw_session(text), public.hw_logout(text),
     public.hw_mine(text, bigint), public.hw_save_score(text, text, jsonb, boolean),
     public.hw_admin_all(text, bigint), public.hw_admin_state(text, jsonb),
     public.hw_admin_add_person(text, text, integer), public.hw_admin_update_person(text, integer, text, integer),
@@ -636,7 +722,7 @@ revoke execute on function
 from public;
 
 grant execute on function
-    public.hw_public(bigint), public.hw_login(text, text), public.hw_session(text), public.hw_logout(text),
+    public.hw_public(bigint), public.hw_results_detail(), public.hw_login(text, text), public.hw_session(text), public.hw_logout(text),
     public.hw_mine(text, bigint), public.hw_save_score(text, text, jsonb, boolean),
     public.hw_admin_all(text, bigint), public.hw_admin_state(text, jsonb),
     public.hw_admin_add_person(text, text, integer), public.hw_admin_update_person(text, integer, text, integer),
@@ -645,7 +731,7 @@ to anon, authenticated;
 
 -- ---------- PIN iniciales (solo a quien no tenga PIN). Cámbialos en Panel → Ajustes. ----------
 update public.usuarios u set pin_hash = public._hw_pin_hash(public._hw_new_salt(), u.nombre, d.pin)
-from (values ('Jorge', '4817'), ('Anonimo', '2593'), ('Tifanny', '7364'), ('admin', '3108')) as d (nombre, pin)
+from (values ('Jorge', '4817'), ('Invitado especial', '2593'), ('Tifanny', '7364'), ('admin', '3108')) as d (nombre, pin)
 where u.nombre = d.nombre and u.pin_hash is null;
 
 -- Recarga el catálogo de la API para que las funciones nuevas queden disponibles de inmediato.

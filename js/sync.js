@@ -2,7 +2,7 @@ import { S } from "./state.js";
 import { ls, toast } from "./utils.js";
 import { api } from "./api.js";
 import { sortPeople } from "./items.js";
-import { busy } from "./scores.js";
+import { busy, editedAt } from "./scores.js";
 import { render, refresh, go } from "./router.js";
 import { enterJudge } from "./views/judge.js";
 import { enterAdmin } from "./views/admin.js";
@@ -14,8 +14,10 @@ export async function poll() {
     const pub = await api.rpc("hw_public", { p_v: S.v.pub });
     if (!pub.unchanged) { changed = true; S.v.pub = pub.v; S.people = sortPeople(pub.people); S.state = { ...S.state, ...pub.state }; }
     if (S.view === "judge") {
+      const t0 = Date.now();
       const m = await api.call("hw_mine", { p_v: S.v.mine });
-      if (!m.unchanged) { changed = true; S.v.mine = m.v; Object.entries(m.scores).forEach(([k, e]) => { if (!busy(k)) S.mine[k] = e; }); }
+      // Una respuesta pedida antes de la última edición local trae datos viejos para ese ítem: se ignora.
+      if (!m.unchanged) { changed = true; S.v.mine = m.v; Object.entries(m.scores).forEach(([k, e]) => { if (!busy(k) && !(editedAt[k] >= t0)) S.mine[k] = e; }); }
     } else if (S.view === "admin") {
       const a = await api.call("hw_admin_all", { p_v: S.v.adm });
       if (!a.unchanged) { changed = true; S.v.adm = a.v; S.all = a.scores; S.state = { ...S.state, ...a.state }; }

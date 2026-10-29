@@ -1,7 +1,7 @@
 import { GRUPOS, ISLAS } from "../data.js";
 import { S } from "../state.js";
 import { $, esc, icon } from "../utils.js";
-import { itemsOf, isDone, sumC } from "../items.js";
+import { itemsOf, isDone, sumC, countC } from "../items.js";
 import { render } from "../router.js";
 import { pollNow } from "../sync.js";
 
@@ -37,10 +37,16 @@ export function renderJudgeDynamic() {
   const n = all.filter(it => isDone(S.mine[it.key])).length;
   $("#pbar").style.width = (all.length ? n / all.length * 100 : 0) + "%";
   $("#ptxt").textContent = `${n} de ${all.length} calificad${kind === "isla" ? "as" : "os"}`;
-  const markOf = e => isDone(e) ? (e.excl ? `<span class="mark excl" title="Excluido">${icon("i-x")}</span>` : `<span class="mark done" title="Calificado">${icon("i-check")}</span>`) : `<span class="mark" title="Pendiente"></span>`;
+  // Check solo cuando está guardado y completo; si no, cuántos criterios lleva (en vivo si la hoja está abierta).
+  const markOf = (key, e) => {
+    const d = S.draft && S.draft.key === key ? S.draft : null;
+    if (isDone(e) && !(d && !isDone(d))) return e.excl ? `<span class="mark excl" title="Excluido">${icon("i-x")}</span>` : `<span class="mark done" title="Calificado y guardado">${icon("i-check")}</span>`;
+    const n = countC(d || e);
+    return `<span class="mark count ${n ? "some" : ""}" title="${n} de 4 criterios evaluados">${n}/4</span>`;
+  };
   if (kind === "isla") {
     box.innerHTML = `<div class="islas">${ISLAS.map(it => { const e = S.mine[it.key]; const G = GRUPOS[it.group];
-      return `<button class="isla" data-act="open" data-k="${it.key}">${markOf(e)}
+      return `<button class="isla" data-act="open" data-k="${it.key}">${markOf(it.key, e)}
         <div class="eyebrow">Grupo ${it.group}</div><h3>${it.name}</h3><p>${esc(G.tema)}${G.detalle ? " · " + esc(G.detalle) : ""}</p>
         <span class="pts">${isDone(e) ? "Tu nota: " + sumC(e) + " / 40" : "Pendiente de calificar"}</span></button>`; }).join("")}</div>`;
     return;
@@ -50,7 +56,7 @@ export function renderJudgeDynamic() {
   if (!S.people.length) { box.innerHTML = `<div class="empty">Todavía no hay participantes. La organizadora los agrega desde el panel.</div>`; return; }
   if (!list.length) { box.innerHTML = `<div class="empty">Nadie con ese nombre en esta fiesta. Revisa la búsqueda o el grupo.</div>`; return; }
   box.innerHTML = `<div class="list">${list.map(it => { const e = S.mine[it.key];
-    return `<button class="row" data-act="open" data-k="${it.key}">${markOf(e)}
+    return `<button class="row" data-act="open" data-k="${it.key}">${markOf(it.key, e)}
       <span class="nm"><b>${esc(it.name)}</b><span>Grupo ${it.group} · ${esc(GRUPOS[it.group]?.tema || "")}</span></span>
       <span class="pts">${isDone(e) ? (e.excl ? "Excluido" : sumC(e) + " / 40") : ""}</span></button>`; }).join("")}</div>`;
 }

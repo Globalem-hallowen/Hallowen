@@ -23,5 +23,26 @@ export function drawWebs() {
     svg("tl", 7, "#8fa6b8", [28, 60, 96, 136, 180, 228, 280]) +
     svg("tr", 21, "#8fa6b8", [34, 76, 124, 178, 236]) +
     svg("br", 43, "#c9824f", [26, 56, 90, 128, 170, 216, 266, 318]) +
-    svg("bl", 77, "#8fa6b8", [40, 88, 140, 196, 256]);
+    svg("bl", 77, "#c9824f", [40, 88, 140, 196, 256]) +
+    svg("mr", 91, "#8fa6b8", [30, 70, 116, 170, 230]);
+}
+
+/* ---------- El ojo de la portada sigue al cursor ---------- */
+export function trackEye() {
+  let raf = 0, x = 0, y = 0;
+  const move = () => {
+    raf = 0;
+    const eye = document.querySelector(".hero .eye"); if (!eye) return;
+    const r = eye.getBoundingClientRect();
+    const dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height / 2), d = Math.hypot(dx, dy) || 1;
+    const k = Math.min(24, d / 12) / d; // máximo 24 unidades del viewBox (200)
+    eye.style.setProperty("--ex", (dx * k).toFixed(2));
+    eye.style.setProperty("--ey", (dy * k).toFixed(2));
+  };
+  addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    document.body.classList.add("tracking");
+    x = e.clientX; y = e.clientY;
+    if (!raf) raf = requestAnimationFrame(move);
+  }, { passive: true });
 }

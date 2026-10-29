@@ -1,5 +1,5 @@
 /* ---------- Datos fijos del concurso ---------- */
-export const JUECES = ["Jorge", "Anonimo", "Tifanny"];
+export const JUECES = ["Jorge", "Invitado especial", "Tifanny"];
 export const GRUPOS = {
   1: { isla: "Isla 1", tema: "Alicia en el País de las Maravillas" },
   2: { isla: "Isla 2", tema: "Tim Burton", detalle: "El extraño mundo de Jack y El cadáver de la novia" },

@@ -13,9 +13,12 @@ async function writeState(patch) {
 
 /* Confirmación antes de acciones delicadas */
 export function ask(what, id) {
+  if (what === "reveal" && !S.state.closed) { toast("Primero cierra la votación para poder revelar los resultados.", true); return; }
   const M = { close: { msg: "¿Cerrar la votación? Las notas se congelan y ningún jurado podrá cambiarlas.", ok: "Sí, cerrar", danger: true },
-    open: { msg: "¿Reabrir la votación? Los jurados podrán volver a cambiar notas.", ok: "Reabrir" },
-    reveal: { msg: S.state.closed ? "¿Revelar resultados? Se activará la pantalla de premiación con el top 3 de cada categoría." : "La votación sigue abierta. ¿Revelar los resultados de todos modos? Se usará el puntaje de este momento.", ok: "Revelar resultados" },
+    open: { msg: S.state.revealed
+      ? "¿Reabrir la votación? Los jurados podrán volver a cambiar notas y los resultados se reiniciarán: se ocultan de la pantalla de premiación y habrá que cerrar y revelar de nuevo."
+      : "¿Reabrir la votación? Los jurados podrán volver a cambiar notas.", ok: "Reabrir", danger: !!S.state.revealed },
+    reveal: { msg: "¿Revelar resultados? Se activará la pantalla de premiación con el top 3 de cada categoría.", ok: "Revelar resultados" },
     hide: { msg: "¿Ocultar los resultados de la pantalla de premiación?", ok: "Ocultar" },
     delp: { msg: `¿Quitar a ${esc(S.people.find(p => p.id === id)?.name || "")} del concurso?`, ok: "Quitar", danger: true } }[what];
   S.confirm = { ...M, what, id }; renderAdmin(); window.scrollTo({ top: 0, behavior: "smooth" });
@@ -26,7 +29,9 @@ export async function doConfirm() {
   if (c.what === "close") {
     if (await writeState({ closed: true })) toast("Votación cerrada. ¡Que hablen los fantasmas!");
   } else if (c.what === "open") {
-    if (await writeState({ closed: false })) toast("Votación abierta de nuevo.");
+    // El servidor reinicia los resultados al reabrir; revealed:false lo deja explícito.
+    const had = S.state.revealed;
+    if (await writeState({ closed: false, revealed: false })) toast(had ? "Votación abierta de nuevo. Los resultados se reiniciaron." : "Votación abierta de nuevo.");
   } else if (c.what === "reveal") {
     const M = source(); const top = R => R.ranked.slice(0, 3).map(r => ({ place: r.place, name: r.name, sub: r.sub, total: r.total }));
     const results = { isla: top(compute("isla", M)), disfraz: top(compute("disfraz", M)), at: Date.now() };

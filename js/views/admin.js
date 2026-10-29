@@ -28,10 +28,11 @@ export function renderAdmin() {
   </div>
   <div class="actions">
     ${st.closed ? `<button class="btn" data-act="ask" data-what="open">Reabrir votación</button>` : `<button class="btn red" data-act="ask" data-what="close">Cerrar votación</button>`}
-    ${st.revealed ? `<button class="btn" data-act="ask" data-what="hide">Ocultar resultados</button>` : `<button class="btn pri" data-act="ask" data-what="reveal">Revelar resultados</button>`}
+    ${st.revealed ? `<button class="btn" data-act="ask" data-what="hide">Ocultar resultados</button>` : `<button class="btn pri" data-act="ask" data-what="reveal" ${st.closed ? "" : `disabled title="Primero cierra la votación"`}>Revelar resultados</button>`}
     <button class="btn" data-act="export" data-what="scores">Exportar calificaciones (CSV)</button>
     <button class="btn" data-act="export" data-what="results">Exportar resultados (CSV)</button>
     <button class="btn ghost" data-act="awards">Pantalla de premiación</button>
+    ${st.awardsDone ? `<a class="btn ghost" href="resultados.html">Detalle de resultados</a>` : ""}
   </div>
   ${S.confirm ? `<div class="confirm"><span>${S.confirm.msg}</span><div><button class="btn ${S.confirm.danger ? "red" : "pri"}" data-act="doconfirm">${S.confirm.ok}</button><button class="btn ghost" data-act="cancelconfirm">Cancelar</button></div></div>` : ""}
   <div class="atabs" role="tablist">

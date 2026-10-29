@@ -27,7 +27,7 @@ jobs:
       - name: Preparar sitio
         run: |
           mkdir _site
-          cp -r index.html config.js css js _site/
+          cp -r index.html resultados.html config.js css js img _site/
           touch _site/.nojekyll
 
       - uses: actions/configure-pages@v5

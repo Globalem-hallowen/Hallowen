@@ -1,26 +1,38 @@
-import { GRUPOS, ISLAS, CRIT, label } from "../data.js";
+import { GRUPOS, CRIT, SAVED_MSGS, label } from "../data.js";
 import { S } from "../state.js";
 import { $, esc, icon, toast } from "../utils.js";
-import { itemsOf, findItem, isDone, sumC } from "../items.js";
-import { pend } from "../scores.js";
+import { findItem, isDone, sumC, countC } from "../items.js";
+import { saveScore } from "../scores.js";
+import { renderJudgeDynamic } from "./judge.js";
 
-/* ---------- Hoja de calificación ---------- */
-// soft = repintar valores sin reconstruir la hoja (tiempo real y guardado).
+/* ---------- Hoja de calificación ----------
+   Las notas se editan en un borrador (S.draft) y solo se guardan con "Guardar", cuando los 4 criterios
+   tienen nota (o el disfraz está excluido). Al cerrar: completo y con cambios → se guarda solo;
+   incompleto y con cambios → se pide confirmar que se descartará. */
+const EMPTY = () => ({ c: [null, null, null, null], excl: false });
+const same = (a, b) => !!a.excl === !!b.excl && [0, 1, 2, 3].every(i => (a.c?.[i] || null) === (b.c?.[i] || null));
+const saved = key => S.mine[key] || EMPTY();
+const dirty = d => !same(d, saved(d.key));
+
+export function openSheet(key) {
+  const e = saved(key);
+  S.sheet = key; S.draft = { key, c: [...(e.c || [null, null, null, null])], excl: !!e.excl, saving: false, ask: false };
+  renderSheet();
+}
+
+// soft = repintar valores sin reconstruir la hoja (tiempo real).
 export function renderSheet(soft) {
   const root = $("#sheetRoot");
-  if (!S.sheet || S.view !== "judge") { root.innerHTML = ""; document.body.style.overflow = ""; return; }
-  const it = findItem(S.sheet); if (!it) { S.sheet = null; root.innerHTML = ""; document.body.style.overflow = ""; return; }
-  const e = S.mine[it.key] || { c: [null, null, null, null], excl: false };
-  const closed = !!S.state.closed;
-  if (soft && root.querySelector(".sheet")?.dataset.k === it.key) { paintSheet(it, e, closed); return; }
+  if (!S.sheet || S.view !== "judge") { S.sheet = null; S.draft = null; root.innerHTML = ""; document.body.style.overflow = ""; return; }
+  const it = findItem(S.sheet); if (!it) { S.sheet = null; S.draft = null; root.innerHTML = ""; document.body.style.overflow = ""; return; }
+  if (!S.draft || S.draft.key !== it.key) { openSheet(it.key); return; }
+  if (soft && root.querySelector(".sheet")?.dataset.k === it.key) { paintSheet(it); return; }
   const G = GRUPOS[it.group] || {};
   const crit = CRIT[it.kind];
   root.innerHTML = `<div class="sheet-bg" data-act="bgclose"><div class="sheet" data-k="${it.key}" role="dialog" aria-modal="true" aria-label="Calificar ${esc(it.name)}">
     <div class="sh-head">
-      <button class="icon-btn" data-act="nav" data-d="-1" aria-label="Anterior">${icon("i-left")}</button>
       <div class="t"><div class="eyebrow">${it.kind === "isla" ? "Isla mejor decorada" : "Mejor disfraz individual"}</div>
         <h2>${esc(it.name)}</h2><div class="sub">Grupo ${it.group} · ${esc(G.tema || "")}${G.detalle ? " (" + esc(G.detalle) + ")" : ""}</div></div>
-      <button class="icon-btn" data-act="nav" data-d="1" aria-label="Siguiente">${icon("i-right")}</button>
       <button class="icon-btn" data-act="close" aria-label="Cerrar">${icon("i-x")}</button>
     </div>
     <div class="sh-body">
@@ -33,43 +45,77 @@ export function renderSheet(soft) {
       </div>`).join("")}
     </div>
     <div class="sh-foot"><span class="st" id="shst"></span><span class="sum" id="shsum"></span>
-      <button class="btn pri" data-act="nextpend">Siguiente pendiente</button></div>
+      <button class="btn pri" data-act="save" id="shsave">Guardar</button></div>
+    <div class="sh-ask" id="shask" hidden><div class="box" role="alertdialog" aria-labelledby="askT">
+      <h3 id="askT">¿Cerrar sin guardar?</h3><p id="askP"></p>
+      <div class="row2"><button class="btn ghost" data-act="keepedit">Seguir calificando</button><button class="btn red" data-act="discard">Cerrar sin guardar</button></div>
+    </div></div>
   </div></div>`;
   document.body.style.overflow = "hidden";
-  paintSheet(it, e, closed);
+  paintSheet(it);
 }
-function paintSheet(it, e, closed) {
-  const excl = !!e.excl;
-  const cb = $("#excl"); if (cb) { cb.checked = excl; cb.disabled = closed; $("#exclBox").classList.toggle("on", excl); }
+
+function paintSheet(it) {
+  const d = S.draft, closed = !!S.state.closed, excl = !!d.excl, lock = closed || d.saving;
+  const cb = $("#excl"); if (cb) { cb.checked = excl; cb.disabled = lock; $("#exclBox").classList.toggle("on", excl); }
   for (let i = 0; i < 4; i++) {
-    const v = e.c?.[i] || 0;
+    const v = d.c[i] || 0;
     const box = $("#crit" + i); box.classList.toggle("off", excl);
-    box.querySelectorAll("button").forEach(b => { const on = +b.dataset.n === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); b.disabled = closed; });
+    box.querySelectorAll("button").forEach(b => { const on = +b.dataset.n === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); b.disabled = lock; });
     $("#lab" + i).textContent = v ? `${v} · ${label(v)}` : "";
   }
-  const st = $("#shst"), p = pend[it.key];
-  st.textContent = closed ? "Votación cerrada" : (p && (p.t || p.n)) ? "Guardando…" : isDone(e) ? "Guardado ✓" : excl ? "" : "Faltan criterios por calificar";
-  $("#shsum").textContent = excl ? "Excluido" : `${sumC(e)} / 40`;
+  const done = isDone(d), wasSaved = isDone(saved(it.key)), changed = dirty(d);
+  $("#shst").textContent = closed ? "Votación cerrada" : d.saving ? "Guardando…"
+    : excl ? (changed ? "Listo para guardar" : "Guardado ✓")
+    : !done ? `${countC(d)} de 4 criterios evaluados` : changed ? "Listo para guardar" : "Guardado ✓";
+  $("#shsum").textContent = excl ? "Excluido" : `${sumC(d)} / 40`;
+  const btn = $("#shsave");
+  btn.textContent = closed ? "Cerrar" : d.saving ? "Guardando…" : wasSaved ? "Actualizar" : "Guardar";
+  btn.disabled = !closed && (d.saving || !done);
+  btn.title = !closed && !done ? "Califica los 4 criterios para poder guardar" : "";
+  const ask = $("#shask"); ask.hidden = !d.ask;
+  if (d.ask) $("#askP").textContent = `Evaluaste ${countC(d)} de 4 criterios de ${it.name}. Si cierras ahora, estas notas no se guardarán.`;
 }
-export function closeSheet() { S.sheet = null; renderSheet(); }
 
-/* Navegación entre islas o participantes, respetando la búsqueda y el filtro de grupo */
-export function sheetNav(d) {
-  const it = findItem(S.sheet); if (!it) return;
-  const list = navList(it.kind);
-  const i = list.findIndex(x => x.key === it.key);
-  const next = list[(i + d + list.length) % list.length];
-  if (next) { S.sheet = next.key; renderSheet(); }
+function repaint() { renderJudgeDynamic(); const it = findItem(S.sheet); if (it) paintSheet(it); }
+
+export function setDraftScore(i, n) {
+  const d = S.draft; if (!d || d.saving || S.state.closed) return;
+  d.c[i] = n; repaint();
 }
-function navList(kind) {
-  if (kind === "isla") return ISLAS;
-  const q = S.q.trim().toLowerCase();
-  const l = itemsOf("disfraz").filter(it => (!S.g || it.group === S.g) && (!q || it.name.toLowerCase().includes(q)));
-  return l.length ? l : itemsOf("disfraz");
+export function setDraftExcl(v) {
+  const d = S.draft; if (!d || d.saving || S.state.closed) return;
+  d.excl = v; repaint();
 }
-export function nextPending() {
-  const it = findItem(S.sheet); if (!it) return;
-  const list = navList(it.kind); const i = list.findIndex(x => x.key === it.key);
-  for (let k = 1; k <= list.length; k++) { const c = list[(i + k) % list.length]; if (!isDone(S.mine[c.key])) { S.sheet = c.key; renderSheet(); return; } }
-  S.sheet = null; renderSheet(); toast(it.kind === "isla" ? "¡Todas las islas calificadas! 🎃" : "¡Ya calificaste a todos! Los murciélagos aplauden.");
+
+function finish() { S.sheet = null; S.draft = null; renderSheet(); renderJudgeDynamic(); }
+
+/* Guardar (botón) o guardado automático al cerrar con todo completo */
+export async function saveDraft(auto) {
+  const d = S.draft; if (!d || d.saving) return;
+  if (S.state.closed) { finish(); return; }
+  if (!isDone(d)) { toast("Califica los 4 criterios antes de guardar.", true); return; }
+  if (!dirty(d)) { finish(); return; }
+  d.saving = true; d.ask = false; repaint();
+  try {
+    await saveScore(d.key, d.c, d.excl);
+    finish();
+    toast(auto ? "Tenías todo calificado: se guardó automáticamente ✓" : SAVED_MSGS[Math.floor(Math.random() * SAVED_MSGS.length)]);
+  } catch (err) {
+    console.warn(err);
+    if (S.draft === d) { d.saving = false; repaint(); }
+    toast(err.status ? err.message : "No se pudo guardar. Revisa tu conexión e intenta de nuevo.", true);
+  }
 }
+
+/* Cerrar con la X, el fondo o Escape */
+export function requestClose() {
+  const d = S.draft; if (!d) { finish(); return; }
+  if (d.saving) return;
+  if (d.ask) { keepEditing(); return; }
+  if (S.state.closed || !dirty(d)) { finish(); return; }
+  if (isDone(d)) { saveDraft(true); return; }
+  d.ask = true; repaint();
+}
+export function keepEditing() { if (S.draft) { S.draft.ask = false; repaint(); } }
+export function discardDraft() { finish(); toast("No se guardaron las notas."); }
