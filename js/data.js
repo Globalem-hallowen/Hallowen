@@ -17,7 +17,7 @@ export const CRIT = {
   disfraz: [
     { t: "Coherencia con la temática", d: "El personaje pertenece a la película o serie de su grupo." },
     { t: "Creatividad y originalidad", d: "Interpretación propia del personaje." },
-    { t: "Elaboración y detalle", d: "Calidad y acabado del disfraz con cualquier material (tela, cartón, papel, plástico u otros elementos reciclados); ingenio en el uso de los materiales; maquillaje y peinado; accesorios y utilería; fidelidad al personaje; esfuerzo y trabajo propio. El costo no da ventaja." },
+    { t: "Elaboración y detalle", d: "Calidad y acabado del disfraz con cualquier material (tela, cartón, papel, plástico u otros elementos reciclados); ingenio en el uso de los materiales; maquillaje y peinado; accesorios y utilería; fidelidad al personaje; esfuerzo y trabajo propio." },
     { t: "Caracterización en el desfile", d: "Actitud y actuación del personaje en la pasarela." }
   ]
 };
