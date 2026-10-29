@@ -236,3 +236,15 @@ tbody tr:hover{background:rgba(242,163,58,.04)}
 .dcrit .bar{height:8px}
 a.btn{text-decoration:none;color:var(--fg)}
 a.brand{text-decoration:none}
+
+/* Filtros de grupo con temática (Disfraces) */
+.chip.grp{display:grid;gap:1px;text-align:left;line-height:1.2;padding:8px 14px;border-radius:14px;flex:none;background:rgba(12,15,19,.92)}
+.chip.grp.on{background:linear-gradient(rgba(242,163,58,.14),rgba(242,163,58,.14)),rgba(12,15,19,.92)}
+.chip.grp b{font-size:14px;font-weight:700}
+.chip.grp small{font-size:11.5px;font-weight:500;color:var(--dim);max-width:24ch;overflow:hidden;text-overflow:ellipsis}
+.chip.grp.on small{color:var(--orange);opacity:.85}
+
+/* Líder de la isla en la tarjeta de decoración */
+.isla{align-content:start}
+.isla .lider{font-size:13px;color:var(--muted)}
+.isla .lider b{color:var(--orange);font-weight:700}

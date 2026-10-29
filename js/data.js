@@ -1,10 +1,10 @@
 /* ---------- Datos fijos del concurso ---------- */
 export const JUECES = ["Jorge", "Invitado especial", "Tifanny"];
 export const GRUPOS = {
-  1: { isla: "Isla 1", tema: "Alicia en el País de las Maravillas" },
-  2: { isla: "Isla 2", tema: "Tim Burton", detalle: "El extraño mundo de Jack y El cadáver de la novia" },
-  3: { isla: "Isla 3", tema: "Alicia en el País de las Maravillas" },
-  4: { isla: "Isla 4", tema: "Piratas del Caribe" }
+  1: { isla: "Isla 1", tema: "Alicia en el País de las Maravillas", lider: "Sandra Sanchez" },
+  2: { isla: "Isla 2", tema: "Tim Burton", detalle: "El extraño mundo de Jack y El cadáver de la novia", lider: "Paola Archila" },
+  3: { isla: "Isla 3", tema: "Alicia en el País de las Maravillas", lider: "Karen Farfán" },
+  4: { isla: "Isla 4", tema: "Piratas del Caribe", lider: "Laura Clavijo" }
 };
 export const ISLAS = [1, 2, 3, 4].map(g => ({ key: "isla-" + g, group: g, name: GRUPOS[g].isla }));
 export const CRIT = {
@@ -31,4 +31,6 @@ export const SAVED_MSGS = [
   "¡Guardada bajo siete telarañas!",
   "¡La bruja dio fe de tu voto!"
 ];
+// Texto de los filtros de grupo: número y temática, como en las tarjetas de decoración.
+export function grpChip(g) { return g ? `<b>Grupo ${g}</b><small>${GRUPOS[g].tema}</small>` : `<b>Todos</b><small>Los 4 grupos</small>`; }
 export function label(n) { return !n ? "" : n <= 2 ? "Deficiente" : n <= 4 ? "Regular" : n <= 6 ? "Bueno" : n <= 8 ? "Muy bueno" : "Excelente"; }

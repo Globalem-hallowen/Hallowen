@@ -8,7 +8,7 @@ import { pollNow } from "../sync.js";
 
 /* ---------- Panel de administración (pantalla) ---------- */
 export function enterAdmin(fromRestore) {
-  S.view = "admin"; S.v.adm = 0;
+  S.gen++; S.view = "admin"; S.v.adm = 0;
   if (!fromRestore) { window.scrollTo(0, 0); render(); }
   pollNow();
 }
@@ -84,7 +84,7 @@ function peopleTab() {
     <div class="addform"><input class="inp" id="newName" placeholder="Nombre y apellido" autocomplete="off">
     <select class="inp" id="newGroup">${[1, 2, 3, 4].map(g => `<option value="${g}">Grupo ${g} · ${GRUPOS[g].tema}</option>`).join("")}</select>
     <button class="btn pri" data-act="addp">Agregar</button></div></div>
-  <div class="grid2" style="margin-top:12px">${byG.map(({ g, list }) => `<div class="panel"><h3>Grupo ${g}</h3><span class="muted" style="font-size:13px">${GRUPOS[g].isla} · ${GRUPOS[g].tema} · ${list.length} personas</span>
+  <div class="grid2" style="margin-top:12px">${byG.map(({ g, list }) => `<div class="panel"><h3>Grupo ${g}</h3><span class="muted" style="font-size:13px">${GRUPOS[g].isla} · ${GRUPOS[g].tema} · Líder: ${GRUPOS[g].lider} · ${list.length} personas</span>
     <div>${list.map(p => S.editId === p.id ? `<div class="prow">
         <input class="inp n" id="ed-name" value="${esc(p.name)}"><select class="inp" id="ed-group">${[1, 2, 3, 4].map(x => `<option value="${x}" ${x === p.group ? "selected" : ""}>G${x}</option>`).join("")}</select>
         <button class="btn sm pri" data-act="savep" data-id="${p.id}">Guardar</button><button class="btn sm ghost" data-act="cancelp">Cancelar</button></div>`

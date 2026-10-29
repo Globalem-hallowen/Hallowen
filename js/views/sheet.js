@@ -15,6 +15,7 @@ const saved = key => S.mine[key] || EMPTY();
 const dirty = d => !same(d, saved(d.key));
 
 export function openSheet(key) {
+  if (!S.mineLoaded) { toast("Un momento: estamos cargando tus votos guardados."); return; }
   const e = saved(key);
   S.sheet = key; S.draft = { key, c: [...(e.c || [null, null, null, null])], excl: !!e.excl, saving: false, ask: false };
   renderSheet();
@@ -32,7 +33,7 @@ export function renderSheet(soft) {
   root.innerHTML = `<div class="sheet-bg" data-act="bgclose"><div class="sheet" data-k="${it.key}" role="dialog" aria-modal="true" aria-label="Calificar ${esc(it.name)}">
     <div class="sh-head">
       <div class="t"><div class="eyebrow">${it.kind === "isla" ? "Isla mejor decorada" : "Mejor disfraz individual"}</div>
-        <h2>${esc(it.name)}</h2><div class="sub">Grupo ${it.group} · ${esc(G.tema || "")}${G.detalle ? " (" + esc(G.detalle) + ")" : ""}</div></div>
+        <h2>${esc(it.name)}</h2><div class="sub">Grupo ${it.group} · ${esc(G.tema || "")}${G.detalle ? " (" + esc(G.detalle) + ")" : ""}${it.kind === "isla" && G.lider ? " · Líder: " + esc(G.lider) : ""}</div></div>
       <button class="icon-btn" data-act="close" aria-label="Cerrar">${icon("i-x")}</button>
     </div>
     <div class="sh-body">

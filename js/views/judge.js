@@ -1,4 +1,4 @@
-import { GRUPOS, ISLAS } from "../data.js";
+import { GRUPOS, ISLAS, grpChip } from "../data.js";
 import { S } from "../state.js";
 import { $, esc, icon } from "../utils.js";
 import { itemsOf, isDone, sumC, countC } from "../items.js";
@@ -7,7 +7,7 @@ import { pollNow } from "../sync.js";
 
 /* ---------- Jurado: lista de islas y disfraces ---------- */
 export function enterJudge(j, fromRestore) {
-  S.judge = j; S.view = "judge"; S.mine = {}; S.v.mine = 0;
+  S.gen++; S.judge = j; S.view = "judge"; S.mine = {}; S.mineLoaded = false; S.v.mine = 0;
   if (!fromRestore) { window.scrollTo(0, 0); render(); }
   pollNow();
 }
@@ -25,7 +25,7 @@ export function renderJudge() {
   <div class="progress"><div class="bar"><i id="pbar"></i></div><span id="ptxt"></span></div>
   ${S.tab === "disf" ? `<div class="filters">
     <input class="search" id="q" type="search" placeholder="Buscar por nombre…" value="${esc(S.q)}" autocomplete="off" aria-label="Buscar participante">
-    <div class="chips">${[0, 1, 2, 3, 4].map(g => `<button class="chip ${S.g === g ? "on" : ""}" data-act="grp" data-g="${g}">${g ? "Grupo " + g : "Todos"}</button>`).join("")}</div>
+    <div class="chips">${[0, 1, 2, 3, 4].map(g => `<button class="chip grp ${S.g === g ? "on" : ""}" data-act="grp" data-g="${g}">${grpChip(g)}</button>`).join("")}</div>
   </div>` : ""}
   <div id="items"></div>`;
   renderJudgeDynamic();
@@ -34,6 +34,10 @@ export function renderJudgeDynamic() {
   const box = $("#items"); if (!box) return;
   const kind = S.tab === "deco" ? "isla" : "disfraz";
   const all = itemsOf(kind);
+  if (!S.mineLoaded) { // aún no llegan las notas guardadas: no mostrar 0/4 como si se hubieran perdido
+    $("#pbar").style.width = "0%"; $("#ptxt").textContent = "Cargando tus votos…";
+    box.innerHTML = `<div class="loading">Invocando tus votos guardados…</div>`; return;
+  }
   const n = all.filter(it => isDone(S.mine[it.key])).length;
   $("#pbar").style.width = (all.length ? n / all.length * 100 : 0) + "%";
   $("#ptxt").textContent = `${n} de ${all.length} calificad${kind === "isla" ? "as" : "os"}`;
@@ -48,6 +52,7 @@ export function renderJudgeDynamic() {
     box.innerHTML = `<div class="islas">${ISLAS.map(it => { const e = S.mine[it.key]; const G = GRUPOS[it.group];
       return `<button class="isla" data-act="open" data-k="${it.key}">${markOf(it.key, e)}
         <div class="eyebrow">Grupo ${it.group}</div><h3>${it.name}</h3><p>${esc(G.tema)}${G.detalle ? " · " + esc(G.detalle) : ""}</p>
+        ${G.lider ? `<span class="lider">Líder: <b>${esc(G.lider)}</b></span>` : ""}
         <span class="pts">${isDone(e) ? "Tu nota: " + sumC(e) + " / 40" : "Pendiente de calificar"}</span></button>`; }).join("")}</div>`;
     return;
   }

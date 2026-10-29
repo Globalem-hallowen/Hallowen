@@ -1,4 +1,4 @@
-import { JUECES, GRUPOS, CRIT, PREMIO } from "../data.js";
+import { JUECES, GRUPOS, CRIT, PREMIO, grpChip } from "../data.js";
 import { $, esc, icon } from "../utils.js";
 import { api, CONFIG_OK } from "../api.js";
 import { bigTitle } from "./home.js";
@@ -36,7 +36,7 @@ async function poll() {
 // Filas listas para pintar: nombre, subtítulo, puesto, totales por criterio.
 function rows(kind) {
   const d = D.data || {};
-  if (kind === "isla") return (d.islas || []).map(r => ({ ...r, key: "isla-" + r.group, name: GRUPOS[r.group]?.isla || "Isla " + r.group, sub: GRUPOS[r.group]?.tema || "" }));
+  if (kind === "isla") return (d.islas || []).map(r => ({ ...r, key: "isla-" + r.group, name: GRUPOS[r.group]?.isla || "Isla " + r.group, sub: (GRUPOS[r.group]?.tema || "") + (GRUPOS[r.group]?.lider ? " · Líder: " + GRUPOS[r.group].lider : "") }));
   return (d.disfraces || []).map(r => ({ ...r, key: "p-" + r.id, sub: `Grupo ${r.group} · ${GRUPOS[r.group]?.tema || ""}` }));
 }
 const placeTxt = p => p === 1 ? "Ganador" : `${p}.º puesto`;
@@ -71,7 +71,7 @@ function renderControls() {
   if (!f.querySelector("#dq")) f.innerHTML = `<div class="filters">
       <input class="search" id="dq" type="search" placeholder="Buscar por nombre…" value="${esc(D.q)}" autocomplete="off" aria-label="Buscar participante">
       <div class="chips" id="dchips"></div></div>`;
-  $("#dchips").innerHTML = [0, 1, 2, 3, 4].map(g => `<button class="chip ${D.g === g ? "on" : ""}" data-act="dgrp" data-g="${g}">${g ? "Grupo " + g : "Todos"}</button>`).join("");
+  $("#dchips").innerHTML = [0, 1, 2, 3, 4].map(g => `<button class="chip grp ${D.g === g ? "on" : ""}" data-act="dgrp" data-g="${g}">${grpChip(g)}</button>`).join("");
 }
 
 function renderList() {
