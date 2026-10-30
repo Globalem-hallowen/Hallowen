@@ -1,5 +1,5 @@
 import { S } from "./state.js";
-import { $, ls } from "./utils.js";
+import { $, ss } from "./utils.js";
 import { go } from "./router.js";
 import { logout } from "./sync.js";
 import { api } from "./api.js";
@@ -44,7 +44,7 @@ function onClick(ev) {
     case "aw": awardStep(+el.dataset.d); break;
     case "awsummary": showWinners(); break;
     // La premiación se abre desde el panel; al salir vuelve al panel si la sesión sigue abierta.
-    case "awexit": if (api.token) { ls.set("hw26-view", null); enterAdmin(); } else go("home"); break;
+    case "awexit": if (api.token) { ss.set("hw26-view", null); enterAdmin(); } else go("home"); break;
     case "awreplay": replayAwards(); break;
     case "fs": toggleFullscreen(); break;
   }

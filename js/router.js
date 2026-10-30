@@ -1,5 +1,5 @@
 import { S } from "./state.js";
-import { $, esc, ls } from "./utils.js";
+import { $, esc, ss } from "./utils.js";
 import { CONFIG_OK } from "./api.js";
 import { homeView, noDbView, setupView } from "./views/home.js";
 import { pinView } from "./views/pin.js";
@@ -30,4 +30,4 @@ export function refresh() {
   else if (S.view === "awards") renderAwards();
   else if (S.view === "home") render();
 }
-export function go(view) { S.view = view; S.sheet = null; ls.set("hw26-view", view === "awards" ? "awards" : null); window.scrollTo(0, 0); render(); }
+export function go(view) { S.view = view; S.sheet = null; ss.set("hw26-view", view === "awards" ? "awards" : null); window.scrollTo(0, 0); render(); }

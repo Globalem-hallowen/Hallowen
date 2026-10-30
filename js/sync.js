@@ -1,5 +1,5 @@
 import { S } from "./state.js";
-import { ls, toast } from "./utils.js";
+import { ss, toast } from "./utils.js";
 import { api } from "./api.js";
 import { sortPeople } from "./items.js";
 import { busy, editedAt } from "./scores.js";
@@ -49,7 +49,7 @@ export function startSync() { poll(); setInterval(poll, 2500); }
 
 /* Sesión */
 async function restore() {
-  if (ls.get("hw26-view") === "awards") { S.view = "awards"; return; }
+  if (ss.get("hw26-view") === "awards") { S.view = "awards"; return; }
   if (!api.token) return;
   try {
     const s = await api.call("hw_session");
