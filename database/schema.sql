@@ -202,23 +202,27 @@ revoke all on public.v_resultados_isla, public.v_resultados_disfraz, public.v_al
 -- =====================================================================
 insert into public.estado_concurso (id) values (1) on conflict (id) do nothing;
 
--- Cambio de nombre: "Anonimo" pasó a ser "Invitado especial". Conserva su id, sus notas y sus sesiones.
--- El hash del PIN incluye el nombre, así que se borra y más abajo recibe el PIN inicial (2593).
+-- Cambio de nombre del tercer jurado: "Anonimo" → "Invitado especial" → "Juliana". Conserva su id, sus
+-- notas y sus sesiones. El hash del PIN incluye el nombre, así que se borra y más abajo recibe el PIN inicial (2593).
 do $$
+declare
+    viejo text;
 begin
-    if exists (select 1 from public.usuarios where nombre = 'Anonimo')
-       and not exists (select 1 from public.usuarios where nombre = 'Invitado especial') then
-        if to_regclass('public.intentos_login') is not null then
-            delete from public.intentos_login where nombre = 'Anonimo';
+    foreach viejo in array array['Anonimo', 'Invitado especial'] loop
+        if exists (select 1 from public.usuarios where nombre = viejo)
+           and not exists (select 1 from public.usuarios where nombre = 'Juliana') then
+            if to_regclass('public.intentos_login') is not null then
+                delete from public.intentos_login where nombre = viejo;
+            end if;
+            update public.usuarios set nombre = 'Juliana', pin_hash = null where nombre = viejo;
         end if;
-        update public.usuarios set nombre = 'Invitado especial', pin_hash = null where nombre = 'Anonimo';
-    end if;
+    end loop;
 end $$;
 
 -- Los PIN iniciales se asignan más abajo, solo a quien aún no tenga PIN.
 insert into public.usuarios (nombre, rol) values
     ('Jorge',   'jurado'),
-    ('Invitado especial', 'jurado'),
+    ('Juliana', 'jurado'),
     ('Tifanny', 'jurado'),
     ('admin',   'admin')
 on conflict (nombre) do nothing;
@@ -731,7 +735,7 @@ to anon, authenticated;
 
 -- ---------- PIN iniciales (solo a quien no tenga PIN). Cámbialos en Panel → Ajustes. ----------
 update public.usuarios u set pin_hash = public._hw_pin_hash(public._hw_new_salt(), u.nombre, d.pin)
-from (values ('Jorge', '4817'), ('Invitado especial', '2593'), ('Tifanny', '7364'), ('admin', '3108')) as d (nombre, pin)
+from (values ('Jorge', '4817'), ('Juliana', '2593'), ('Tifanny', '7364'), ('admin', '3108')) as d (nombre, pin)
 where u.nombre = d.nombre and u.pin_hash is null;
 
 -- Recarga el catálogo de la API para que las funciones nuevas queden disponibles de inmediato.
