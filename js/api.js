@@ -3,9 +3,10 @@ import { ls, ss } from "./utils.js";
 /* ---------- Conexión con Supabase (funciones hw_* de database/schema.sql) ---------- */
 const CFG = window.HW_CONFIG || {};
 export const CONFIG_OK = !!CFG.supabaseUrl && !!CFG.supabaseKey && !/PEGA|YOUR/i.test(CFG.supabaseKey);
-// La sesión vive en sessionStorage: se mantiene al recargar, pero al cerrar la pestaña hay que entrar de nuevo.
-// Se borra la de versiones anteriores, que quedaba guardada 7 días en localStorage.
+// La sesión solo se conserva al recargar (F5). Entrar de nuevo al link (misma pestaña, pestaña nueva o
+// pestañas restauradas) pide elegir jurado y PIN. Se borra también la de versiones anteriores (localStorage).
 ls.set("hw26-token", null); ls.set("hw26-view", null);
+if (performance.getEntriesByType?.("navigation")?.[0]?.type !== "reload") { ss.set("hw26-token", null); ss.set("hw26-view", null); }
 export const api = {
   token: ss.get("hw26-token"),
   async rpc(fn, args = {}) {
